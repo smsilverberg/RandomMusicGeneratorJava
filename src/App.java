@@ -3,24 +3,26 @@ import java.util.Random;
 import javax.sound.sampled.*;
 
 /**
- * TODO: turn the main method's code into a method with too many parameters oof
+ * TODO: GUI
  * chords?
- * get AI to fill out more scales lol
+ * random chance to add notes from chromatic scale not already included if a different scale is chosen, bases on bound variable
+ * get AI to fill out more scales for me
  * param to randomly change the the whole bar's octave after some bars instead of just randomly changing a few notes
- * Java GUI 
 **/
 
 public class App {
 
 
-    // scales
+    // scales - add scales here to be used in generation
     static String[] scaleBlues1 = { "C", "C#", "D", "F", "G", "A#" };
     static String[] scaleChromatic = { "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B" };
 
     public static void main(String[] args) throws InterruptedException {
         //*****DISCLAIMER*****// for really high/low octaves and yer ears and speakers! stick with 3 to 6 for now, 4s a good start
         Random rand = new Random();
+
         //details. change em around or not
+
         int measureLength = 4; //notes per line
         int barLength = 2; //lines per bar
         int octave = 3; //octave: choose 0 to 8 (higher number, higher pitch)
@@ -28,31 +30,44 @@ public class App {
         int pause = 300; //between lines, not notes
         int bars = 4; //# of bars
         boolean changeOctave = true; // true will randomly change octaves
-        int bound = 60; // lower number means more likely to change octave
+        int bound = 35; // lower number means more likely to change octave
         // uncomment which scale to use, only 2 so far (blues & chromatic)
         // String[] scale = scaleBlues1;
         String[] scale = scaleChromatic;
+
         //end details
 
         int[] nums = new int[measureLength]; // array to hold the random numbers for musical tones
+        // String[] notes = new String[measureLength]; //array to hold notes that were played
+        
         int start = 0;
-        boolean closeLine = true; //true will have a small delay between each note, set false to remove delay...maybe
+        int measure = 1;
+
+        boolean closeLine = true; //true will have a small delay between each note, not sure what false does
         while (start < bars) {
+            
             for (int i = 0; i < measureLength; i++) nums[i] = rand.nextInt(scale.length);
-            // for (int i = 0; i < measureLength; i++) nums[i] = 0;
             for (int i = 0; i < barLength; i++) {
+                println("\nmeasure " + String.valueOf(measure)); //printing measure #
+                measure++;
                 for (int ii = 0; ii < measureLength; ii++) {
+                    int octaveGen = octave; //octave that was chosen and randomly changed
                     if (changeOctave) {
                         int chance = rand.nextInt(bound);
-                        if (chance == bound - 1) playNote(scale[nums[ii]], octave + 1, duration, closeLine);
-                        else if (chance == 0) playNote(scale[nums[ii]], octave - 1, duration, closeLine);
+                        if (chance == bound - 1) {playNote(scale[nums[ii]], octave + 1, duration, closeLine); octaveGen += 1;}
+                        else if (chance == 0) {playNote(scale[nums[ii]], octave - 1, duration, closeLine); octaveGen -= 1;}
                         else playNote(scale[nums[ii]], octave, duration, closeLine);
                     } else playNote(scale[nums[ii]], octave, duration, closeLine);
+                    // notes[i] = scale[nums[ii]];
+                    println(scale[nums[ii]] + "\t" + String.valueOf(octaveGen)); //printing notes
                 }
                 Thread.sleep(pause);
+                
             }
             start++;
         }
+        println("note\toctave");
+        // for (String note : notes) {println(note);} 
     }
 
     // utility methods
@@ -77,7 +92,7 @@ public class App {
 
     /**
      * Plays a note for a specified duration
-     * * @param note      the note
+     * @param note    the note
      * @param octave    the octave
      * @param duration  duration in msec
      * @param closeLine If true, there will be a small delay between each call of
